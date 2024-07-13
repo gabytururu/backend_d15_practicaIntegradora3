@@ -21,7 +21,7 @@ export const errorHandler=async(error,req,res,next)=>{
         ...errorDetails,
         ...new reqLoggerDTO(req)
     }
-    req.logger.warning(`New Custom Error triggered: \n`, {details})   
+    req.logger.warning(`CLIENT BOUNCED: New Custom Error triggered: \n`, {details})   
 
     switch(error.code){
         case ERROR_CODES.INVALID_ARGUMENTS:

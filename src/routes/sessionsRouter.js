@@ -78,28 +78,28 @@ router.get('/current', customAuth(["user"]), async(req,res)=>{
     })
 })
 
-router.get('/users/:uid', customAuth(["public"]), async(req,res)=>{
-    const { uid } = req.params
-    const singleUser = await usersManager.getUserByFilter({_id:uid})
+// router.get('/users/:uid', customAuth(["public"]), async(req,res)=>{
+//     const { uid } = req.params
+//     const singleUser = await usersManager.getUserByFilter({_id:uid})
     
-    res.setHeader('Content-type', 'application/json');
-    return res.status(200).json({payload:singleUser})
-})
+//     res.setHeader('Content-type', 'application/json');
+//     return res.status(200).json({payload:singleUser})
+// })
 
-router.get('/users', customAuth(["public"]), async(req,res)=>{    
-    const allUsers = await usersManager.getAllUsers()
+// router.get('/users', customAuth(["public"]), async(req,res)=>{    
+//     const allUsers = await usersManager.getAllUsers()
 
-    res.setHeader('Content-type', 'application/json');
-    return res.status(200).json({payload:allUsers})
-})
+//     res.setHeader('Content-type', 'application/json');
+//     return res.status(200).json({payload:allUsers})
+// })
 
-router.put('/users/:uid/:orderTicket',customAuth(["user"]),async(req,res)=>{
-    const {uid,orderTicket} =req.params   
-    const updatedUser = await usersManager.addTicketToUser(uid,orderTicket)
+// router.put('/users/:uid/:orderTicket',customAuth(["user"]),async(req,res)=>{
+//     const {uid,orderTicket} =req.params   
+//     const updatedUser = await usersManager.addTicketToUser(uid,orderTicket)
 
-    res.setHeader('Content-type', 'application/json');
-    return res.status(200).json({payload:updatedUser})    
-})
+//     res.setHeader('Content-type', 'application/json');
+//     return res.status(200).json({payload:updatedUser})    
+// })
 
 router.get('/logout', customAuth(["user","admin"]),async(req,res)=>{
     req.session.destroy(error=>{

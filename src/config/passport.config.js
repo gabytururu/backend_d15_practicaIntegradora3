@@ -23,7 +23,7 @@ export const initPassport=()=>{
             async(req,username,password,done)=>{
                 try {
                     //const {nombre} = req.body
-                    const {first_name, last_name, age} = req.body
+                    const {first_name, last_name, age, rol} = req.body
                     if(!first_name){ 
                         appLogger.info('REGISTRO FAILED: Failed to complete signup due to missing name.Please make sure all mandatory fields(*)are completed to proceed with signup') 
                         return done(null,false, {message: `Signup failed: Must complete all signup required data to access`})
@@ -51,10 +51,12 @@ export const initPassport=()=>{
                         appLogger.info('REGISTRO FAILED: The email you are trying to register (email: %s) already exists in our database and cannot be duplicated. Please try again using a diferent email',username)  
                         return done(null,false, {message: `Signup failed: Email already exists and cannot be duplicated - please try again.`})
                     }
+
+                    //missing validation fo proper postmanClient body format?? eg, {}
                    
                     password = hashPassword(password)                  
                     const newCart = await cartsService.createNewCart()
-                    const newUser = await usersManager.createUser({first_name, last_name, age,email:username,password,cart:newCart._id})
+                    const newUser = await usersManager.createUser({first_name, last_name, age,email:username,password,rol,cart:newCart._id})
                     
                     return done(null, newUser)
 

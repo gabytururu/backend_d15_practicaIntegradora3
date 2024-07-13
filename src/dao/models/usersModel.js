@@ -29,7 +29,17 @@ const usersSchema = new mongoose.Schema(
                     }
                 }
             ]
-        }     
+        },
+        productsOwned: {
+            type:[
+                {
+                    ownedProduct:{
+                        type:mongoose.Types.ObjectId,
+                        ref:"products"
+                    }
+                }
+            ]
+        }          
     },
     {timestamps:true, strict:false}
 )

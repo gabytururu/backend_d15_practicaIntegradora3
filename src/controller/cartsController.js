@@ -13,7 +13,7 @@ import { ERROR_CODES } from "../utils/EErrors.js";
 import { reqLoggerDTO } from '../DTO/reqLoggerDTO.js';
 // import { TicketsMongoDAO } from '../dao/ticketsMongoDAO.js';
 
-const usersManager = new UsersManager()
+const usersManager = new UsersManager() //maybe move to a service?
 
 export class CartsController{
     static getCarts=async(req,res)=>{

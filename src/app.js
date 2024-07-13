@@ -6,6 +6,7 @@ import {router as productsRouter} from './routes/productsRouter.js'
 import {router as cartsRouter} from './routes/cartsRouter.js'
 import {router as vistasRouter} from './routes/vistasRouter.js'
 import {router as sessionsRouter} from './routes/sessionsRouter.js'
+import { router as usersRouter } from './routes/usersRouter.js';
 import { messagesModel } from './dao/models/messagesModel.js';
 import { engine } from 'express-handlebars';
 import { Server } from 'socket.io';
@@ -51,6 +52,7 @@ app.use("/", vistasRouter)
 app.use("/api/products", productsRouter)
 app.use("/api/carts", cartsRouter)
 app.use("/api/sessions", sessionsRouter)
+app.use("/api/users", usersRouter)
 
 app.use(errorHandler)
 
