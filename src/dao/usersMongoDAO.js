@@ -19,10 +19,27 @@ export class UsersMongoDAO{
 
     //para el product service estos dos se pueden abstraer y unificar pq es misma ruta.. solo requiere un ternario inicial como hicimos en carts
     async update(uid,itemToUpdate){
-        const query = itemToUpdate.hasOwnProperty('purchaser')?{$push:{tickets:{orderTicket}}}:{$push:{productsOwned:{ownedProduct}}}
+        let query;
+        if(itemToUpdate.hasOwnProperty('purchaser')){
+            let orderTicket = itemToUpdate
+            query = {$push:{tickets:{orderTicket}}}
+        }else{
+            let ownedProduct = itemToUpdate
+            query = {$push:{productsOwned:{ownedProduct}}}
+        }
+
+        // const query = itemToUpdate.hasOwnProperty('purchaser')?{$push:{tickets:{itemToUpdate}}}:{$push:{productsOwned:{itemToUpdate}}}
         return await usersModel.findByIdAndUpdate(
             uid,
             query,
+            {runValidators:true, returnDocument:'after'}
+        )
+    }
+
+    async remove(uid,ownedProduct){
+        return await usersModel.findByIdAndUpdate(
+            uid,
+            {$pull:{productsOwned:{ownedProduct}}},
             {runValidators:true, returnDocument:'after'}
         )
     }

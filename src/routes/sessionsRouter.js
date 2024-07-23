@@ -57,7 +57,7 @@ router.post('/login',passportCallError("login"),async(req,res)=>{
     })      
 })
 
-router.get('/current', customAuth(["user"]), async(req,res)=>{
+router.get('/current', customAuth(["user","premium"]), async(req,res)=>{
    // const currentUser = req.session.user
     const currentUserDTO = new userDTO(req.session.user)
 
@@ -101,7 +101,7 @@ router.get('/current', customAuth(["user"]), async(req,res)=>{
 //     return res.status(200).json({payload:updatedUser})    
 // })
 
-router.get('/logout', customAuth(["user","admin"]),async(req,res)=>{
+router.get('/logout', customAuth(["user","admin","premium"]),async(req,res)=>{
     req.session.destroy(error=>{
         if(error){
             res.setHeader('Content-type', 'application/json');

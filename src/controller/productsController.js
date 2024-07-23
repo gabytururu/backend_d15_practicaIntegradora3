@@ -4,9 +4,8 @@ import { CustomError } from "../utils/CustomError.js";
 import { postMissingProperty, duplicatedCode, notFound } from "../utils/errorCauses.js";
 import { ERROR_CODES } from "../utils/EErrors.js";
 import { reqLoggerDTO } from "../DTO/reqLoggerDTO.js";
-import { UsersManagerMongo as UsersManager } from "../dao/usersManagerMONGO.js";
-
-const usersManager = new UsersManager() //maybe move to a service?
+//import { UsersManagerMongo as UsersManager } from "../dao/usersManagerMONGO.js";
+import { usersService } from "../services/usersService.js";
 
 export class ProductsController{
     static getProducts=async(req,res)=>{
@@ -69,28 +68,13 @@ export class ProductsController{
     }
 
     static postProduct=async(req, res, next)=>{
+        res.setHeader('Content-type', 'application/json');        
         const {title, description, code, price, stock,category,thumbnails} = req.body
-        res.setHeader('Content-type', 'application/json');
-
-        const user= req.session.user
         const {email: userEmail, _id:userId, rol:userRol}= req.session.user
-        //let userRol= req.session.user?.rol
-        req.logger.debug('el user  es %s',user)
-        req.logger.debug('el user rol PRE CONDITIONAL-->%s ',userRol)
-
         if(!userRol) {userRol = 'public'}
-        req.logger.debug('el user rol POST CONDITIONAL-->%s',userRol)
-
 
         let productOwner;
-        if (userRol === "premium"){
-           // productOwner = user.email
-            productOwner = userEmail
-        }else{
-            productOwner = "admin"
-        }        
-      
-        req.logger.debug('wl product owner es-->%s',productOwner)
+        userRol === 'premium' ?  productOwner = userEmail : productOwner = "admin"
 
         const prodToPost = {
             title: title,
@@ -103,10 +87,6 @@ export class ProductsController{
             thumbnails: thumbnails || 'tbd',
             owner: productOwner
         }
-
-        req.logger.debug('el user rol POST CON OWNER-->%s',prodToPost)
-
-
     
         for(const property in prodToPost){
                 if(prodToPost[property] === undefined){ 
@@ -131,7 +111,7 @@ export class ProductsController{
     
         try{         
             const newProduct = await productsService.postNewProduct(prodToPost)
-            if (userRol==="premium") await usersManager.addProductToOwner(userId,newProduct._id) //create service?           
+            if (userRol==="premium") await usersService.addProductToOwner(userId,newProduct._id)          
             return res.status(200).json({
                 payload: newProduct
             })
@@ -145,9 +125,12 @@ export class ProductsController{
     }
 
     static updateProduct=async(req,res)=>{
+        res.setHeader('Content-type', 'application/json');
+        
         const {id} = req.params
         const propsToUpdate = req.body 
-        res.setHeader('Content-type', 'application/json');
+        const {email: userEmail, _id:userId, rol:userRol}= req.session.user
+        if(!userRol) {userRol = 'public'}
     
         if(!isValidObjectId(id)){
             return res.status(400).json({error:`The ID# provided is not an accepted Id Format in MONGODB database. Please verify your ID# and try again`})
@@ -159,14 +142,19 @@ export class ProductsController{
                 return res.status(404).json({
                     error: `Failed to complete product update: the product you are trying to modify (product with ID#${id}) was not found in our database. Please verify your ID# and try again`,                
                 })
-            }
+            }            
+            if(userRol === "premium" && matchingProduct.owner !== userEmail){
+                return res.status(404).json({
+                    error: `Invalid Credencials. User lacks authorization to update this product.`,                
+                })           
+            }            
         }catch(error){
             req.logger.error('Server Error 500',new reqLoggerDTO(req,error)) 
             return res.status(500).json({
                 error:`Error - Server failed, please try again later`,
                 message: error.message
             })
-        }   
+        }        
         
         if(propsToUpdate._id){
             return res.status(400).json({
@@ -209,31 +197,38 @@ export class ProductsController{
     static deleteProduct=async(req,res)=>{
         res.setHeader('Content-type', 'application/json');
         const {id} = req.params
-        //testear que pasa si soy public... a ver si rompe en su caso, poner esto en condicional if req.session.user ...  pero evaluar el flow completo
-        const {email: userEmail, _id:userId, rol:userRol}= req.session.user
+        const {email: userEmail, _id:userId, rol:userRol}= req.session.user        
 
-        //OJO LO PRIMERO ES HACER UN SERVICE CREO PQ si voa empezar a usar mucho user manager entonces mejor de una el service? 
-        //luego... 
-        //0.//IF user is premium or user is admin -- no se requiere pq tengo el auth
-        //1.//if product belongs to admin -- delete product next
-        //2.//else get user by id.. + mapear sus productos
-        //3.//if product belongs to user --- delete 
-        //4. else error-- este usuario no puede borrar este producto pq no le pertence
+        req.logger.debug("el email: %s, el id: %s, el rol: %s",userEmail,userId,userRol)
 
-      
         if(!isValidObjectId(id)){
             return res.status(400).json({error:`The ID# provided is not an accepted Id Format in MONGODB database. Please verify your ID# and try again`})
         }
 
+        try{
+            const prodToDelete = await productsService.getProductBy({_id:id})
+            if(!prodToDelete){
+                return res.status(404).json({
+                    error: `Failed to delete product: the product you are trying to delete (product with ID#${id}) was not found. Please verify and try again`,                
+                })
+            }            
+            if(userRol === "premium" && prodToDelete.owner !== userEmail){
+                return res.status(404).json({
+                    error: `Invalid Credencials. User lacks authorization to delete this product.`,                
+                })           
+            }            
+        }catch(error){
+            req.logger.error('Server Error 500',new reqLoggerDTO(req,error)) 
+            return res.status(500).json({
+                error:`Error 500 Server failed unexpectedly, please try again later`,
+                message: `${error.message}`
+            })
+        }
      
     
         try {     
             let deletedProduct = await productsService.deleteProduct(id)
-            if(!deletedProduct){
-                return res.status(404).json({
-                    error: `Failed to delete product: the product you are trying to delete (ID#${id}) was not found in our database. Please verify your ID# and try again`,                
-                })
-            }           
+            if (userRol==="premium") await usersService.removeProductFromOwner(userId,deletedProduct._id)            
             return res.status(200).json({
                 payload:deletedProduct
             })

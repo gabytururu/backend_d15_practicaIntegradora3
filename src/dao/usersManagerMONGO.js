@@ -28,4 +28,12 @@ export class UsersManagerMongo{
             {runValidators:true, returnDocument:'after'}
         )
     }
+
+    async removeProductFromOwner(uid,ownedProduct){
+        return await usersModel.findByIdAndUpdate(
+            uid,
+            {$pull:{productsOwned:{ownedProduct}}},
+            {runValidators:true, returnDocument:'after'}
+        )
+    }
 }

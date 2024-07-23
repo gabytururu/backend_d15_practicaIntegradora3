@@ -24,6 +24,10 @@ class UsersService{
     addProductToOwner=async(uid,ownedProduct)=>{
         return await this.dao.update(uid,ownedProduct)
     }
+
+    removeProductFromOwner=async(uid,ownedProduct)=>{
+        return await this.dao.remove(uid,ownedProduct) 
+    }
 }
 
  
