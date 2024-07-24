@@ -12,7 +12,7 @@ export class UsersManagerMongo{
         return newUserCreated.toJSON()
     }  
 
-    //para el product service estos dos se pueden abstraer y unificar pq es misma ruta.. solo requiere un ternario inicial como hicimos en carts
+   
     async addTicketToUser(uid,orderTicket){
         return await usersModel.findByIdAndUpdate(
             uid,

@@ -67,11 +67,11 @@ export class ProductsController{
         }
     }
 
-    static postProduct=async(req, res, next)=>{
-        res.setHeader('Content-type', 'application/json');        
+    static postProduct=async(req, res, next)=>{ 
         const {title, description, code, price, stock,category,thumbnails} = req.body
         const {email: userEmail, _id:userId, rol:userRol}= req.session.user
         if(!userRol) {userRol = 'public'}
+        res.setHeader('Content-type', 'application/json');       
 
         let productOwner;
         userRol === 'premium' ?  productOwner = userEmail : productOwner = "admin"

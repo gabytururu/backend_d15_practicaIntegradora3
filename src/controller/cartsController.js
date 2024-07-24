@@ -11,6 +11,7 @@ import { CustomError } from "../utils/CustomError.js";
 import { invalidCartBody, notFound, notProcessed } from "../utils/errorCauses.js";
 import { ERROR_CODES } from "../utils/EErrors.js";
 import { reqLoggerDTO } from '../DTO/reqLoggerDTO.js';
+import { usersService } from '../services/usersService.js';
 // import { TicketsMongoDAO } from '../dao/ticketsMongoDAO.js';
 
 const usersManager = new UsersManager() //maybe move to a service?
@@ -86,17 +87,18 @@ export class CartsController{
         }
     }
 
+    // falta TESTEAR POST VALIDACION DE    if(pidIsValid.owner===userEmail){
     static replaceCartContent=async(req,res)=>{
         const {cid} = req.params;
         const newCartDetails = req.body
+        const {email: userEmail, _id:userId, rol:userRol}= req.session.user
         res.setHeader('Content-type', 'application/json')
     
         if(!isValidObjectId(cid)){
             return res.status(400).json({error:`The Cart ID# provided is not an accepted Id Format in MONGODB database. Please verify your Cart ID# and try again`})
         }
     
-        try{
-           
+        try{           
             const cartIsValid = await cartsService.getCartById(cid)
             if(!cartIsValid){
                 return res.status(404).json({
@@ -142,6 +144,13 @@ export class CartsController{
                         message: `Failed to replace the content in cart id#${cid}. Product id#${pid} was not found in our database. Please verify and try again`
                     })
                 }
+                req.logger.debug(pidIsValid)
+                if(pidIsValid.owner===userEmail){
+                    return res.status(500).json({
+                        error: `ERROR: Cart could not be replaced`,
+                        message: `Failed to replace the content in cart id#${cid} due to invalid Product.  Users cannot purchase their own product. Product id#${pid} Is owned by ${userEmail}, hence, it cannot be added to its cart`
+                    })
+                }
             }  
         }catch(error){
             req.logger.error('Server Error 500',new reqLoggerDTO(req,error)) 
@@ -175,6 +184,7 @@ export class CartsController{
     static updateProductInCart=async(req,res,next)=>{
         const {cid, pid} = req.params
         const {qty} = req.body
+        const {email: userEmail, _id:userId, rol:userRol}= req.session.user
         res.setHeader('Content-type', 'application/json');
         
         try{
@@ -216,6 +226,16 @@ export class CartsController{
                     notFound(cid,"cid"),
                     `cid #${cid} was not found`, 
                     ERROR_CODES.RESOURCE_NOT_FOUND
+                ))
+            }
+
+            const productToAdd = await productsService.getProductBy({_id:pid})
+            if(productToAdd.owner === userEmail){
+                return next(CustomError.createError(
+                    "Product was not added to Cart",
+                    notProcessed(),
+                    `Premium Users cannot purchase their own products: Pid#${pid} Is owned by ${userEmail}, hence, it cannot be added to its cart `,
+                    ERROR_CODES.INTERNAL_SERVER_ERROR
                 ))
             }
 
@@ -390,7 +410,8 @@ export class CartsController{
             }
             
             const ticketCreated = await ticketsService.createTicket(ticketDetails)    
-            const ticketUserAssigned = await usersManager.addTicketToUser(userId,ticketCreated._id)
+           // const ticketUserAssigned = await usersManager.addTicketToUser(userId,ticketCreated._id)
+            const ticketUserAssigned = await usersService.addTicketToUser(userId,ticketCreated._id)
             const emailSent = await sendEmail(
                 `BACKEND ECOMM TICKET ${config.GMAIL_EMAIL}`,
                 `${userEmail}`,

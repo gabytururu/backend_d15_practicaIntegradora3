@@ -6,6 +6,7 @@ import { cartsService } from "../services/cartsService.js";
 import { UsersManagerMongo as UsersManager } from "../dao/usersManagerMONGO.js";
 import { hashPassword, validatePassword } from "../utils.js";
 import { reqLoggerDTO } from "../DTO/reqLoggerDTO.js";
+import { appLoggerDTO } from "../DTO/appLoggerDTO.js";
 import { appLogger } from "../utils/logger.js";
 
 const usersManager = new UsersManager()
@@ -61,7 +62,8 @@ export const initPassport=()=>{
                     return done(null, newUser)
 
                 } catch (error) {
-                    appLogger.error('Server Error Caught at REGISTRO strategy',new reqLoggerDTO(req,error)) 
+                    console.log('el error aca en el passport_',error)
+                    req.logger.error('Server Error Caught at REGISTRO strategy',new reqLoggerDTO(req,error)) 
                     return done(error) 
                 }
             }
@@ -112,7 +114,7 @@ export const initPassport=()=>{
                     }               
                     return done(null,userIsValid)
                 } catch (error) {
-                    appLogger.error('Server Error Caught at LOGIN strategy',new reqLoggerDTO(req,error)) 
+                    appLogger.error('Server Error Caught at LOGIN strategy',new appLoggerDTO(error)) 
                     return done(error)
                 }
             }
