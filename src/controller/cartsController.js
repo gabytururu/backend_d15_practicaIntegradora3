@@ -148,7 +148,7 @@ export class CartsController{
                 if(pidIsValid.owner===userEmail){
                     return res.status(500).json({
                         error: `ERROR: Cart could not be replaced`,
-                        message: `Failed to replace the content in cart id#${cid} due to invalid Product.  Users cannot purchase their own product. Product id#${pid} Is owned by ${userEmail}, hence, it cannot be added to its cart`
+                        message: `Failed to replace the content in cart id#${cid} due to invalid Product.  Users cannot purchase their own products. Product id#${pid} Is owned by ${userEmail}, hence, it cannot be added to its cart`
                     })
                 }
             }  
@@ -410,7 +410,6 @@ export class CartsController{
             }
             
             const ticketCreated = await ticketsService.createTicket(ticketDetails)    
-           // const ticketUserAssigned = await usersManager.addTicketToUser(userId,ticketCreated._id)
             const ticketUserAssigned = await usersService.addTicketToUser(userId,ticketCreated._id)
             const emailSent = await sendEmail(
                 `BACKEND ECOMM TICKET ${config.GMAIL_EMAIL}`,

@@ -5,48 +5,73 @@ import { config } from '../config/config.js';
 import { UsersManagerMongo as UsersManager } from '../dao/usersManagerMONGO.js';
 import { usersService } from '../services/usersService.js';
 
-let usersManager = new UsersManager()
-
 export const router=Router();
 
-router.get('/', customAuth(["public"]), async(req,res)=>{    
-    //const allUsers = await usersManager.getAllUsers()
-    const allUsers = await usersService.getUsers()
-
+router.get('/', customAuth(["admin"]), async(req,res)=>{    
     res.setHeader('Content-type', 'application/json');
-    return res.status(200).json({payload:allUsers})
+    try {
+        const allUsers = await usersService.getUsers()
+        return res.status(200).json({payload:allUsers})
+    } catch (error) {
+        return res.status(500).json({
+            error:`Error 500 Server failed unexpectedly, please try again later`,
+            message: `${error.message}`
+        })
+    }    
 })
 
-router.get('/:uid', customAuth(["public"]), async(req,res)=>{
+router.get('/:uid', customAuth(["admin"]), async(req,res)=>{
     const { uid } = req.params
-    //const singleUser = await usersManager.getUserByFilter({_id:uid})
-    const singleUser= await usersService.getUserById({_id:uid})
+    res.setHeader('Content-type', 'application/json');
+
+    try {
+        const singleUser= await usersService.getUserById({_id:uid})   
+        return res.status(200).json({payload:singleUser})
+    } catch (error) {
+        return res.status(500).json({
+            error:`Error 500 Server failed unexpectedly, please try again later`,
+            message: `${error.message}`
+        })
+    }  
+})
+
+router.put('/premium/:uid', customAuth(["admin"]), async(req,res)=>{
+    const {uid} =req.params
+    res.setHeader('Content-type', 'application/json');
     
-    res.setHeader('Content-type', 'application/json');
-    return res.status(200).json({payload:singleUser})
+    try{
+        const user= await usersService.getUserById({_id:uid})
+        if(user.rol==='user'){
+            user.rol = 'premium'
+        }else if(user.rol === 'premium'){
+            user.rol = 'user'       
+        }
+
+        const updateRolUser= await usersService.changeUserRol({_id:uid},{rol:user.rol})
+        res.setHeader('Content-type', 'application/json');
+        return res.status(200).json({payload:updateRolUser})
+    }catch{      
+        return res.status(500).json({
+            error:`Error 500 Server failed unexpectedly, please try again later`,
+            message: `${error.message}`
+        })
+    }
 })
 
+// NO ESTOY SEGURA SI ESTAS DOS RUTAS PUT DEBEN EXISTIR COMO ENDPOINT o NO ES NECESARIO (actualmente los servicios addTickettouser y addProductToOwner) ya son consumidos en POST Product y POST purchase order - se requieren tmb como endpoints?
+// router.put('/:uid/:orderTicket',customAuth(["user","premium","admin"]),async(req,res)=>{
+//     const {uid,orderTicket} =req.params   
+//     const updatedUser = await usersService.addTicketToUser(uid,orderTicket)
 
-//AJUSTADOS-     //FALTA TESTEAR POST CREACION DE DAO + SERVICE 
-//TMB FALTA VALORAR SI hace sentido que existan o si no es necesario que existan via CLIENT sino unicamente como subservicio de las funciones que los ocupan (ej purchasetickes para este put, y productPost para el put de product owner)
-//OJO TMB despues de testear estas rutas ... toca sustituir los usersManager en productPosting y en finalizePurchase -- pues estan usando manager y ahora deben utilizar el service + testear q operan OK
-router.put('/:uid/:orderTicket',customAuth(["user"]),async(req,res)=>{
-    const {uid,orderTicket} =req.params   
-    //const updatedUser = await usersManager.addTicketToUser(uid,orderTicket)
-
-    const updatedUser = await usersService.addTicketToUser(uid,orderTicket)
-
-    res.setHeader('Content-type', 'application/json');
-    return res.status(200).json({payload:updatedUser})    
-})
+//     res.setHeader('Content-type', 'application/json');
+//     return res.status(200).json({payload:updatedUser})    
+// })
 
 
-router.put('/:uid/:productOwned',customAuth(["user"]),async(req,res)=>{
-    const {uid,productOwned} =req.params   
-    //const updatedUser = await usersManager.addTicketToUser(uid,orderTicket)
-    //FALTA TESTEAR
-    const updatedUser = await usersService.addProductToOwner(uid,productOwned)
+// router.put('/:uid/:productOwned',customAuth(["user"]),async(req,res)=>{
+//     const {uid,productOwned} =req.params   
+//     const updatedUser = await usersService.addProductToOwner(uid,productOwned)
 
-    res.setHeader('Content-type', 'application/json');
-    return res.status(200).json({payload:updatedUser})    
-})
+//     res.setHeader('Content-type', 'application/json');
+//     return res.status(200).json({payload:updatedUser})    
+// })

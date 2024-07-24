@@ -18,15 +18,19 @@ class UsersService{
     }
 
     addTicketToUser=async(uid,orderTicket)=>{
-        return await this.dao.update(uid,orderTicket)
+        return await this.dao.push(uid,orderTicket)
     }
 
     addProductToOwner=async(uid,ownedProduct)=>{
-        return await this.dao.update(uid,ownedProduct)
+        return await this.dao.push(uid,ownedProduct)
     }
 
     removeProductFromOwner=async(uid,ownedProduct)=>{
         return await this.dao.remove(uid,ownedProduct) 
+    }
+
+    changeUserRol=async(uid,updatedRol)=>{
+        return await this.dao.update(uid,updatedRol)
     }
 }
 
