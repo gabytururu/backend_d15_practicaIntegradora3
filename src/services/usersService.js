@@ -13,6 +13,10 @@ class UsersService{
         return await this.dao.getOneBy(uid)
     }
 
+    getUserByEmail= async(email)=>{
+        return await this.dao.getOneBy(email)
+    }
+
     createUser= async(newUser)=>{
         return await this.dao.create(newUser)
     }

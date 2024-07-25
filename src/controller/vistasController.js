@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken"
 import { productsService } from "../services/productsService.js";
 import { cartsService } from "../services/cartsService.js";
 import { ticketsService } from "../services/ticketsService.js";
@@ -215,6 +216,13 @@ export class VistasController{
                 message: error.message
             })
         }
+    }
+
+    static renderPassword=async(req,res)=>{
+        // const {token} = req.params
+        // console.log('el token es:',token)
+        res.setHeader('Content-type', 'text/html');
+        return res.status(200).render('password')
     }
 }
 

@@ -245,3 +245,19 @@ h2{
     font-size: 17px;
     color:white;
 }
+
+.passwordButton{
+    background-color: #f3eb74;
+    margin-top:35px;
+    padding: 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 17px;
+    color:rgb(3, 3, 3);
+    font-weight:700;
+    cursor:pointer      
+}
+
+.passwordButton:hover{
+    background-color: #ffee07;
+}

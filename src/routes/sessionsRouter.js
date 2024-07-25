@@ -1,12 +1,15 @@
+import jwt from "jsonwebtoken";
 import { Router } from 'express';
 import { passportCallError } from '../utils.js';
 import passport from "passport";
 import {customAuth} from '../middleware/auth.js'
 import { userDTO } from '../DTO/userDTO.js';
 import { UsersManagerMongo as UsersManager } from '../dao/usersManagerMONGO.js';
+import { usersService } from "../services/usersService.js";
 import { reqLoggerDTO } from '../DTO/reqLoggerDTO.js';
+import { config } from "../config/config.js";
 
-let usersManager = new UsersManager()
+//let usersManager = new UsersManager()
 
 export const router=Router();
 
@@ -58,9 +61,9 @@ router.post('/login',passportCallError("login"),async(req,res)=>{
 })
 
 router.get('/current', customAuth(["user","premium"]), async(req,res)=>{
-   // const currentUser = req.session.user
+    const currentUser = req.session.user
     const currentUserDTO = new userDTO(req.session.user)
-
+    console.log(currentUserDTO)
     const acceptHeader = req.headers['accept']
     if(acceptHeader.includes('text/html')){
         return res.status(301).redirect('/perfil')
@@ -71,9 +74,12 @@ router.get('/current', customAuth(["user","premium"]), async(req,res)=>{
         status:'success',
         message: 'current user was obtained successfully',
         payload:{
-            fullName:currentUserDTO.fullName,
-            email: currentUserDTO.email,
-            cart:currentUserDTO.cart
+            fullname: currentUser.fullname,
+            email: currentUser.email,
+            cart:currentUser.cart
+            // fullName:currentUserDTO.fullName,
+            // email: currentUserDTO.email,
+            // cart:currentUserDTO.cart
         }    
     })
 })
@@ -154,4 +160,25 @@ router.get('/callbackGithub',passport.authenticate("github",{failureMessage:true
             carrito: githubAuthenticatedUser.cart,
         }
     })
+})
+
+router.get('/password', async(req,res)=>{
+    console.log('se llamo bien al endpoint api sessions password')
+    const {email} = req.body
+    console.log('el email recuperado fue:', email)
+    // try {
+    //     const user = await usersService.getUserByEmail({email:email})
+    //     console.log("el user encontrado fue:",user)
+    //     //let token=jwt.sign(usuario, config.JWT_SECRET, {expiresIn: "1h"})
+    
+    //     res.setHeader('Content-type', 'application/json');
+    //     return res.status(200).json({payload:'todo bien con la llamada al endpoint password'})
+    // } catch (error) {
+    //     res.setHeader('Content-type', 'application/json');
+    //     return res.status(500).json({
+    //         error:`esta fallando el endpoint password`,
+    //         message: `${error.message}`
+    //     })
+    // }
+  
 })

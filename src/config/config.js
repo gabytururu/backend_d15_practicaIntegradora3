@@ -16,5 +16,6 @@ export const config={
     SESSION_SECRET: process.env.SESSION_SECRET,
     GMAIL_EMAIL:process.env.GMAIL_EMAIL,
     GMAIL_PASS:process.env.GMAIL_PASS,
-    ENVIRONMENT: process.env.ENVIRONMENT
+    ENVIRONMENT: process.env.ENVIRONMENT,
+    JWT_SECRET:process.env.JWT_SECRET
 }
