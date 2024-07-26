@@ -15,6 +15,20 @@ export default __dirname
 export const hashPassword = (password) => bcrypt.hashSync(password,bcrypt.genSaltSync(10))
 export const validatePassword = (password, hashPassword) =>bcrypt.compareSync(password, hashPassword)
 
+export const validatePasswordAsync = async (password, hashPassword) => {
+    try {
+        const isMatch = await bcrypt.compare(password, hashPassword);
+        return isMatch;
+    } catch (error) {
+        console.error('Error comparing passwords:', error);
+        res.setHeader('Content-type', 'application/json');
+        return res.status(500).json({
+            error:`Error 500 Server failed unexpectedly at validatePasswordAsync, please try again later`,
+            message: `${error.message}`
+        })
+    }
+};
+
 
 export const passportCallError = (estrategia) =>{
     return function (req,res,next){

@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { Router } from 'express';
-import { passportCallError, sendEmail,hashPassword, validatePassword } from '../utils.js';
+import { passportCallError, sendEmail,hashPassword, validatePassword, validatePasswordAsync } from '../utils.js';
 import passport from "passport";
 import {customAuth} from '../middleware/auth.js'
 import { userDTO } from '../DTO/userDTO.js';
@@ -156,7 +156,7 @@ router.post('/password',customAuth(["public"]), async(req,res)=>{
             })
         }
 
-        const token = jwt.sign(user,config.JWT_SECRET,{expiresIn:30})
+        const token = jwt.sign(user,config.JWT_SECRET,{expiresIn:'1h'})
         const tokenEmail = await sendEmail(
             `ECOMM Store Password Reset ${config.GMAIL_EMAIL}`,
             `${user.email}`,
@@ -192,34 +192,19 @@ router.post('/password',customAuth(["public"]), async(req,res)=>{
   
 })
 
-//testing async version to debug -- still not working
-const validatePasswordAsync = async (password, hashPassword) => {
-    try {
-        const isMatch = await bcrypt.compare(password, hashPassword);
-        return isMatch;
-    } catch (error) {
-        console.error('Error comparing passwords:', error);
-        throw error;
-    }
-};
-
 router.post('/resetPassword',async(req,res)=>{      
 
     try {
         let {email, oldPassword, newPassword} = req.body
-        let isMatch=await validatePasswordAsync(oldPassword, newPassword)
+        let isMatch=await validatePasswordAsync(newPassword, oldPassword)
         console.log({isMatch})
 
-        //not working properly neither in sync version nor in async -- future improvement
-        //if(validatePassword(oldPassword, newPassword)){
         if(isMatch){
-            console.log('PASSWORD REPETIDO!!!')
-
             res.setHeader('Content-type', 'application/json');
             return res.status(400).json({
                 error:`Error 400, please verify and try again`,
                 message: `Password repetido`,
-                details: `Tu nuevo password no puede ser igual al anterior. Porfavor intenta nuevamente con otra contraseña`
+                details: `Tu nuevo password no puede ser igual al anterior. Reintenta con otra contraseña`
             })
         }
 

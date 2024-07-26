@@ -21,6 +21,22 @@ newPasswordButton.addEventListener('click',async(e)=>{
             })
         })
         const data=await response.json()
+        console.log('respuesta server:',data)
+
+        if(response.status !== 200 && data.message =='Password repetido'){
+            let paragraph = document.createElement('p')
+            paragraph.textContent = data.details
+            paragraph.style.color = 'red';
+            paragraph.style.fontSize = '20px';
+        
+            let errorContainer = document.querySelector("#response")
+            errorContainer.appendChild(paragraph)
+
+            setTimeout(()=>{
+                errorContainer.innerHTML = ''
+            },5000)
+        }
+
         if(response.status === 200){
             let paragraph = document.createElement('p')
             paragraph.textContent = data.message
