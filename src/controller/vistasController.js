@@ -4,6 +4,7 @@ import { cartsService } from "../services/cartsService.js";
 import { ticketsService } from "../services/ticketsService.js";
 import { generateMockProduct } from "../utils.js";
 import { reqLoggerDTO } from "../DTO/reqLoggerDTO.js";
+import { config } from "../config/config.js";
 
 
 export class VistasController{
@@ -218,11 +219,31 @@ export class VistasController{
         }
     }
 
-    static renderPassword=async(req,res)=>{
-        // const {token} = req.params
-        // console.log('el token es:',token)
+    static renderPassword=async(req,res)=>{    
         res.setHeader('Content-type', 'text/html');
         return res.status(200).render('password')
+    }
+
+    static renderResetPassword=async(req,res)=>{
+        const {token} = req.query
+
+        if(!token){
+            return res.status(301).redirect('/error')
+        }   
+        
+        let usuario=jwt.verify(token,config.JWT_SECRET)
+       // let {_id:userId, first_name:userName, email:email, password:userOldPassword} = usuario
+        let {first_name:userName, email:email, password:userOldPassword} = usuario
+        //console.log({userId, userName})
+        
+        // return res.status(200).render('resetPassword',{userId,userName,userOldPassword})
+        res.setHeader('Content-type', 'text/html');
+        return res.status(200).render('resetPassword',{userName, email, userOldPassword})
+    }
+
+    static renderError=async(req,res)=>{  
+        res.setHeader('Content-type', 'text/html');
+        return res.status(200).render('error404')
     }
 }
 

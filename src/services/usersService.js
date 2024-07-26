@@ -36,6 +36,9 @@ class UsersService{
     changeUserRol=async(uid,updatedRol)=>{
         return await this.dao.update(uid,updatedRol)
     }
+    changeUserPassword=async(uid,updatedPassword)=>{
+        return await this.dao.update(uid,updatedPassword)
+    }
 }
 
  

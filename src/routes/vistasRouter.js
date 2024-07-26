@@ -25,6 +25,8 @@ if(config.ENVIRONMENT==='prod'){
     router.get('/logout',customAuth(["public"]),VistasController.renderLogout)
     router.get('/purchase/:tid',customAuth(["user","admin","premium"]),VistasController.renderTicket)
     router.get('/password',customAuth(["public"]),VistasController.renderPassword)
+    router.get('/resetPassword',customAuth(["public"]),VistasController.renderResetPassword)
+    router.get('/error',customAuth(["public"]),VistasController.renderError)
 }
 
   //logger test endpoint
@@ -46,6 +48,8 @@ if(config.ENVIRONMENT==='prod'){
   router.get('/logout',customAuth(["public"]),VistasController.renderLogout)
   router.get('/purchase/:tid',customAuth(["user","admin","premium"]),VistasController.renderTicket)
   router.get('/password',customAuth(["public"]),VistasController.renderPassword)
+  router.get('/resetPassword',customAuth(["public"]),VistasController.renderResetPassword)
+  router.get('/error',customAuth(["public"]),VistasController.renderError)
 
 
 

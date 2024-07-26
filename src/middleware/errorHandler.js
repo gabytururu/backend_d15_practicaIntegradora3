@@ -7,6 +7,10 @@ import __dirname from '../utils.js'
 import { reqLoggerDTO } from "../DTO/reqLoggerDTO.js";  
 
 export const errorHandler=async(error,req,res,next)=>{
+    console.log('error HANDLER EXECUTED')
+    if(!req.logger){
+        console.log('req.logger is UNDEFINED from error handler')
+    }
     const errorDetails = {
         code:error.code,
         type: error.name,
@@ -17,11 +21,21 @@ export const errorHandler=async(error,req,res,next)=>{
         details: error.cause
     }
 
+    
+    
     let details={
         ...errorDetails,
-        ...new reqLoggerDTO(req)
     }
-    req.logger.warning(`CLIENT BOUNCED: New Custom Error triggered: \n`, {details})   
+
+    if(req.user){
+        details={...details, ...new reqLoggerDTO(req)}
+    }
+
+    if(req.logger){
+        req.logger.warning(`CLIENT BOUNCED: New Custom Error triggered: \n`, {details})   
+    }else{
+        console.warn('logger is undefined')
+    }
 
     switch(error.code){
         case ERROR_CODES.INVALID_ARGUMENTS:

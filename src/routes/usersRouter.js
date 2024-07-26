@@ -58,7 +58,7 @@ router.put('/premium/:uid', customAuth(["admin"]), async(req,res)=>{
     }
 })
 
-// NO ESTOY SEGURA SI ESTAS DOS RUTAS PUT DEBEN EXISTIR COMO ENDPOINT o NO ES NECESARIO (actualmente los servicios addTickettouser y addProductToOwner) ya son consumidos en POST Product y POST purchase order - se requieren tmb como endpoints?
+
 // router.put('/:uid/:orderTicket',customAuth(["user","premium","admin"]),async(req,res)=>{
 //     const {uid,orderTicket} =req.params   
 //     const updatedUser = await usersService.addTicketToUser(uid,orderTicket)
