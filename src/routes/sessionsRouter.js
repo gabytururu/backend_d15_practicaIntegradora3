@@ -156,7 +156,7 @@ router.post('/password',customAuth(["public"]), async(req,res)=>{
             })
         }
 
-        const token = jwt.sign(user,config.JWT_SECRET,{expiresIn:'1h'})
+        const token = jwt.sign(user,config.JWT_SECRET,{expiresIn:30})
         const tokenEmail = await sendEmail(
             `ECOMM Store Password Reset ${config.GMAIL_EMAIL}`,
             `${user.email}`,

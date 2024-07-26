@@ -231,14 +231,22 @@ export class VistasController{
             return res.status(301).redirect('/error')
         }   
         
-        let usuario=jwt.verify(token,config.JWT_SECRET)
-       // let {_id:userId, first_name:userName, email:email, password:userOldPassword} = usuario
-        let {first_name:userName, email:email, password:userOldPassword} = usuario
-        //console.log({userId, userName})
-        
-        // return res.status(200).render('resetPassword',{userId,userName,userOldPassword})
-        res.setHeader('Content-type', 'text/html');
-        return res.status(200).render('resetPassword',{userName, email, userOldPassword})
+       // let usuario=jwt.verify(token,config.JWT_SECRET,(error,decoded)=>{
+        jwt.verify(token,config.JWT_SECRET,(error,jwtDecodedUser)=>{
+            if(error){
+                res.setHeader('Content-type', 'text/html');
+                return res.status(401).render('redirectError',{
+                    error:`Error 401 The token has expired or is invalid`,
+                    details: `El token brindado ya expiró o es inválido. Necesitamos emitir un nuevo token a tu email para completar el reestablecimiento de tu contraseña`,
+                    message: `${error.message}`
+                })
+            }else{
+                req.user = jwtDecodedUser 
+                let {first_name:userName, email:email, password:userOldPassword} = req.user
+                res.setHeader('Content-type', 'text/html');
+                return res.status(200).render('resetPassword',{userName, email, userOldPassword})
+            }
+        })      
     }
 
     static renderError=async(req,res)=>{  
